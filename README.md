@@ -5,6 +5,7 @@ Library for visual list scrolling access to RMS Indexed Files. Uses SMG terminal
 For Openvms on VAX and Alpha
 
 Author : Michael Brown, Newcastle Australia.
+Email  : vmslib@b5.net
 
 BUILDING EXECUTABLE:
 
