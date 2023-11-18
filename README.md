@@ -1,6 +1,6 @@
 # SWbrowse
 
-Library for visual list scrolling access to RMS Indexed Files. Uses SMG terminal control. Packaged with example invoicing relational database application utilising the library.
+Library for a visual scrolling list browser for RMS Indexed Files. Uses SMG terminal control. Packaged with example invoicing relational database application utilising the library.
 
 For Openvms on VAX and Alpha
 
