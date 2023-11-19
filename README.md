@@ -6,6 +6,8 @@ For Openvms on VAX and Alpha
 
 Author : Michael Brown, Newcastle Australia.
 Email  : vmslib@b5.net
+This is intended as a demo of the library functions, it is a copy of the development tree. there is no documentation for the library calls. Hopefully the example database application might give some insight.
+
 
 BUILDING EXECUTABLE:
 
