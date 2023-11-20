@@ -9,8 +9,8 @@ Email  : vmslib@b5.net
 
 This is intended as a demo of the library functions. It's under development and this is a copy of the development tree. There is no documentation for the library calls.
 
-The example database application can be used and modified in any way and
-if anyone ever develops their own application, that is something I'd like
+The example database application can be used and modified in any way.
+If anyone ever develops their own application from this software, that is something I'd like
 to know about.
 
 
