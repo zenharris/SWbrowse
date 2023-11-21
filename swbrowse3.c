@@ -3,7 +3,7 @@
  * Title:       swbrowse3.c
  * Author:      Michael Brown <vmslib@b5.net>
  * Created:     03 Jun 2023
- * Last update:
+ * Last update: 21 Nov 2023
  */
 
 
