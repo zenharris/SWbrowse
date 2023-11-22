@@ -7,6 +7,7 @@
 #include "extools.h"
 #include "screen.h"
 
+
 int rms_status;
 
    Xinit_terminal ()
