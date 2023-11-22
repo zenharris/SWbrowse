@@ -1,5 +1,4 @@
 
-
 /*
 struct scr_params {
     int row,col;
