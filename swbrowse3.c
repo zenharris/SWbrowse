@@ -3,8 +3,7 @@
  * Title:       swbrowse3.c
  * Author:      Michael Brown <vmslib@b5.net>
  * Created:     03 Jun 2023
- * Last update: 21 Nov 2023
- *
+ * Last update:
  */
 
 
@@ -39,7 +38,7 @@
 #include "swformdef.h"
 #include "swlocality.h"
 
-#define VERSION "3.04"  
+#define VERSION "3.4.1"  
 
 #define SIZE_UNAME	12
 #define SIZE_TIMESTR 23
@@ -301,11 +300,11 @@ char *frstchr;
 
    ReadSearchTerm(searchkey);
 
-#ifdef __ALPHA
-   searchkey[0] = toupper(searchkey[0]);
-#else
+#ifdef CAPSEARCH
    for (i = 0;searchkey[i] != 0;i++)
          searchkey[i] = toupper(searchkey[i]);
+#else
+   searchkey[0] = toupper(searchkey[0]);
 #endif
 
    for(i=strlen(searchkey);i < SIZE_NAME;i++)
@@ -629,7 +628,7 @@ char **argv;
       memcpy(&master_master,&master_buff,sizeof(master_buff));
 
  
-      HeadLine("SW Database Browser V%s - Logged in as %s",centre,VERSION,user_name);
+      HeadLine("SW Database Browser v%s - Logged in as %s",centre,VERSION,user_name);
 /*                                                                   
       rms_status = 98728;
       warn_user("*RMS Indexed File Browser System* %s %s %u",rmslookup(rms_status),filterfn(__FILE__),__LINE__);
