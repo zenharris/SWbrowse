@@ -38,7 +38,7 @@
 #include "swformdef.h"
 #include "swlocality.h"
 
-#define VERSION "3.4.1"  
+#define VERSION "3.4.2"  
 
 #define SIZE_UNAME	12
 #define SIZE_TIMESTR 23
