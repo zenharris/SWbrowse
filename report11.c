@@ -31,26 +31,29 @@ static float total;
 static float tax[5];
 static int reprint = FALSE;
 
-extern struct filestruct PrimFile, quote_file, master_file,
-  receipt_file;
+extern struct filestruct PrimFile, quote_file, master_file, receipt_file;
 
 
 FILE *stdprn;
 
-extern void lock_read_master();
-extern void write_master_record();
+extern void lock_read_master ();
+extern void write_master_record ();
 
 extern int errno;
 
-int open_stdprn(char *fn) {
+int
+open_stdprn (char *fn)
+{
 
-   stdprn = fopen(fn, "w");
-   if (stdprn == NULL) {
-      warn_user("Open Fail %s %s %s %u",strerror (errno),fn,filterfn(__FILE__),__LINE__);
-      return(FALSE);
-   }
-   rewind(stdprn);
-   return(TRUE);
+  stdprn = fopen (fn, "w");
+  if (stdprn == NULL)
+    {
+      warn_user ("Open Fail %s %s %s %u", strerror (errno), fn,
+                 filterfn (__FILE__), __LINE__);
+      return (FALSE);
+    }
+  rewind (stdprn);
+  return (TRUE);
 }
 
 
@@ -61,7 +64,7 @@ heading (funct)
   struct timebuff adjtime;
   int iter;
 
-  get_time(&adjtime);
+  get_time (&adjtime);
 
   switch (funct)
     {
@@ -76,14 +79,15 @@ heading (funct)
 */
 
       for (iter = 0; iter < 5; iter++)
-	fprintf (stdprn, "\n");
+        fprintf (stdprn, "\n");
       fprintf (stdprn, "Invoice Number : %5.5i     Quote Number : %5.5i\n",
-	       quote_buff.invoice_no, quote_buff.quote_no);
+               quote_buff.invoice_no, quote_buff.quote_no);
 
 
       fprintf (stdprn, "Invoice Date   : %s    ",
-	       print_date(&quote_buff.invoice_date));
-      fprintf (stdprn, "%s : %s\n",(reprint)?"RePrint":"Printed",print_time (&adjtime));
+               print_date (&quote_buff.invoice_date));
+      fprintf (stdprn, "%s : %s\n", (reprint) ? "RePrint" : "Printed",
+               print_time (&adjtime));
 
 /*
       fprintf (stdprn, "Invoice Date   : %2hu/%2hu/%4u     Printed : %s",
@@ -92,30 +96,31 @@ heading (funct)
 */
 
       fprintf (stdprn,
-	       "Order Number   : %-10s    Tax Code : %c   Tax Number : %-10s\n\n",
-	       quote_buff.order_num, quote_buff.tax_code, quote_buff.tax_num);
+               "Order Number   : %-10s    Tax Code : %c   Tax Number : %-10s\n\n",
+               quote_buff.order_num, quote_buff.tax_code, quote_buff.tax_num);
 
       fprintf (stdprn, "\n\n\n\n");
 
       fprintf (stdprn, "                %s\n", fileio.record.name);
       fprintf (stdprn, "                %s\n", fileio.record.p_address1);
       fprintf (stdprn, "                %s\n", fileio.record.p_address2);
-      fprintf (stdprn, "                %s\n\n\n","" /* primary_buff.p_address3*/);
+      fprintf (stdprn, "                %s\n\n\n",
+               "" /* primary_buff.p_address3 */ );
       break;
     case cancel:
       fprintf (stdprn, "*****      REPORT  TERMINATED BY  USER  at %s",
-	       print_time (&adjtime));
+               print_time (&adjtime));
       break;
     case ende:
       fprintf (stdprn, "\n");
       if (quote_buff.discount != 0.0)
-	fprintf (stdprn, "%65s %10.2f\n", "Discount ", quote_buff.discount);
+        fprintf (stdprn, "%65s %10.2f\n", "Discount ", quote_buff.discount);
       for (iter = 0; iter < 5; iter++)
-	if (tax[iter] != 0.0)
-	  fprintf (stdprn, "%53s%c%10.2f%% %10.2f\n", "Tax at Rate ",
-		   iter + 'A', master_buff.sales_tax[iter], tax[iter]);
+        if (tax[iter] != 0.0)
+          fprintf (stdprn, "%53s%c%10.2f%% %10.2f\n", "Tax at Rate ",
+                   iter + 'A', master_buff.sales_tax[iter], tax[iter]);
       fprintf (stdprn, "%66s%10.2f\n",
-	       (whole_flag) ? "Wholesale Total. " : "Retail Total. ", total);
+               (whole_flag) ? "Wholesale Total. " : "Retail Total. ", total);
       fputc (EJECT, stdprn);
       break;
     }
@@ -132,7 +137,7 @@ heading (funct)
 
 
 void
-print_invoice (struct scrllst_msg_rec *msg,struct filestruct *filedef)
+print_invoice (struct scrllst_msg_rec *msg, struct filestruct *filedef)
 {
 /*  struct receipt_rec receipt_buff;
   struct receipt_key0_rec receipt_key;
@@ -154,7 +159,7 @@ print_invoice (struct scrllst_msg_rec *msg,struct filestruct *filedef)
         unsigned long  reason;
     } iosb;
 */
-  
+
   static char *ver[] = {
     "     Print Invoice    ",
     "     Cancel Report    "
@@ -167,24 +172,24 @@ print_invoice (struct scrllst_msg_rec *msg,struct filestruct *filedef)
     "   Itemised Invoice   ",
     "     Totals  Only     "
   };
-  whole_flag = TRUE ;  /* verifyx (whole, FALSE); */
-  itemize_flag = TRUE; /* verifyx (item, FALSE);*/
+  whole_flag = TRUE;            /* verifyx (whole, FALSE); */
+  itemize_flag = TRUE;          /* verifyx (item, FALSE); */
 
-  if (TRUE /*warn_user ("Print Invoice Y/N") == 'y'*/)
+  if (TRUE /*warn_user ("Print Invoice Y/N") == 'y' */ )
     {
-      open_window(8, 10, 64, 3, WHITE, border);
-      exscrprn("Enter Filename to Print On", 0, 2, WHITE);
-      exscrprn("^Z to Cancel", crnt_window->lnth - 1, 2, WHITE);
-  
-      strcpy(filenm,"invoice.txt");
-      lnpos = strlen(filenm);
-      do 
-        wch = linedt(filenm, 1, 0, 60, WHITE, &lnpos, &cont, NULL);
-      while(wch != SMG$K_TRM_CTRLZ && wch != SMG$K_TRM_CR);
-      close_window();
-      if(wch == SMG$K_TRM_CTRLZ) 
+      open_window (8, 10, 64, 3, WHITE, border);
+      exscrprn ("Enter Filename to Print On", 0, 2, WHITE);
+      exscrprn ("^Z to Cancel", crnt_window->lnth - 1, 2, WHITE);
+
+      strcpy (filenm, "invoice.txt");
+      lnpos = strlen (filenm);
+      do
+        wch = linedt (filenm, 1, 0, 60, WHITE, &lnpos, &cont, NULL);
+      while (wch != SMG$K_TRM_CTRLZ && wch != SMG$K_TRM_CR);
+      close_window ();
+      if (wch == SMG$K_TRM_CTRLZ)
         {
-          warn_user("Cancelling Report");
+          warn_user ("Cancelling Report");
           return;
         }
     }
@@ -192,56 +197,59 @@ print_invoice (struct scrllst_msg_rec *msg,struct filestruct *filedef)
     return;
 
 
-  if(!open_stdprn(filenm)) return;
+  if (!open_stdprn (filenm))
+    return;
 
 
   quote_file.rab.rab$b_rac = RAB$C_RFA;
-  rfa_copy(&quote_file.rab.rab$w_rfa,&quote_file.CurrentPtr->rfa);
+  rfa_copy (&quote_file.rab.rab$w_rfa, &quote_file.CurrentPtr->rfa);
 
-  quote_file.rab.rab$l_ubf = (char *)quote_file.fileio; /*record; */
+  quote_file.rab.rab$l_ubf = (char *) quote_file.fileio;        /*record; */
   quote_file.rab.rab$w_usz = quote_file.fileiosz;
   quote_file.rab.rab$l_rop = RAB$M_NLK;
 
-  rms_status = sys$get(&quote_file.rab);
+  rms_status = sys$get (&quote_file.rab);
 
-  if (!rmstest(rms_status,2,RMS$_NORMAL,RMS$_OK_RLK))
+  if (!rmstest (rms_status, 2, RMS$_NORMAL, RMS$_OK_RLK))
     {
-      warn_user("$GET %s %s %u",rmslookup(rms_status),filterfn(__FILE__),__LINE__);
+      warn_user ("$GET %s %s %u", rmslookup (rms_status), filterfn (__FILE__),
+                 __LINE__);
       return;
     }
 
-  read_master_record();
+  read_master_record ();
   memcpy (&quote_buff, quote_file.fileio, sizeof (quote_buff));
 
 
-  if (quote_buff.invoice_no == 0)  /* if this is not a reprint */
+  if (quote_buff.invoice_no == 0)       /* if this is not a reprint */
     {
 /*
       status = sys$start_transw (1, 0, &iosb, NULL, 0, tid);
       check_status ("start");
 */
-      lock_read_master();
+      lock_read_master ();
       if (rms_status == RMS$_RLK)
         {
-          warn_user("Locked Master");
+          warn_user ("Locked Master");
           return;
         }
 
       quote_file.rab.rab$b_rac = RAB$C_RFA;
-      rfa_copy(&quote_file.rab.rab$w_rfa,&quote_file.CurrentPtr->rfa);
-      quote_file.rab.rab$l_ubf = (char *)quote_file.fileio;
+      rfa_copy (&quote_file.rab.rab$w_rfa, &quote_file.CurrentPtr->rfa);
+      quote_file.rab.rab$l_ubf = (char *) quote_file.fileio;
       quote_file.rab.rab$w_usz = quote_file.fileiosz;
       quote_file.rab.rab$l_rop = RAB$M_RLK;
 
-      rms_status = sys$get(&quote_file.rab);
-      if (!rmstest(rms_status,2,RMS$_NORMAL,RMS$_RLK))
+      rms_status = sys$get (&quote_file.rab);
+      if (!rmstest (rms_status, 2, RMS$_NORMAL, RMS$_RLK))
         {
-          warn_user("$FIND %s %s %u",rmslookup(rms_status),filterfn(__FILE__),__LINE__);
+          warn_user ("$FIND %s %s %u", rmslookup (rms_status),
+                     filterfn (__FILE__), __LINE__);
           return;
         }
       if (rms_status == RMS$_RLK)
         {
-          warn_user(strerror (EVMSERR, rms_status));
+          warn_user (strerror (EVMSERR, rms_status));
           return;
         }
 
@@ -249,31 +257,34 @@ print_invoice (struct scrllst_msg_rec *msg,struct filestruct *filedef)
 
       quote_buff.invoice_no = master_buff.invoice_no++;
       get_time (&quote_buff.invoice_date);
-      dttodo(&quote_buff.invoice_date);
+      dttodo (&quote_buff.invoice_date);
 
-      memcpy(quote_file.fileio,&quote_buff,sizeof(quote_buff));
+      memcpy (quote_file.fileio, &quote_buff, sizeof (quote_buff));
 
-      (*quote_file.setprompt)(quote_file.CurrentPtr,&quote_file);
+      (*quote_file.setprompt) (quote_file.CurrentPtr, &quote_file);
 
-      write_master_record();
-      if (rms_status != RMS$_NORMAL){ 
-         warn_user("%s",strerror (EVMSERR, rms_status));
-         return;
-      }
+      write_master_record ();
+      if (rms_status != RMS$_NORMAL)
+        {
+          warn_user ("%s", strerror (EVMSERR, rms_status));
+          return;
+        }
 
       quote_file.rab.rab$b_rac = RAB$C_KEY;
-      quote_file.rab.rab$l_rbf = (char *)quote_file.fileio;
+      quote_file.rab.rab$l_rbf = (char *) quote_file.fileio;
       quote_file.rab.rab$w_rsz = quote_buff.reclen;
- 
-      rms_status = sys$update(&quote_file.rab);
-      if (!rmstest(rms_status,3,RMS$_NORMAL,RMS$_DUP,RMS$_OK_DUP)) {
-          warn_user("UPD$ fail %s %s %u",rmslookup(rms_status),filterfn(__FILE__),__LINE__);
+
+      rms_status = sys$update (&quote_file.rab);
+      if (!rmstest (rms_status, 3, RMS$_NORMAL, RMS$_DUP, RMS$_OK_DUP))
+        {
+          warn_user ("UPD$ fail %s %s %u", rmslookup (rms_status),
+                     filterfn (__FILE__), __LINE__);
 /*
           status = sys$abort_transw (1, 0, &iosb, NULL, 0, tid);
           check_status ("abort");
 */
           return;
-      }
+        }
 /*
       status = sys$end_transw (1, 0, &iosb, NULL, 0, tid);
       check_status ("end");
@@ -290,43 +301,46 @@ print_invoice (struct scrllst_msg_rec *msg,struct filestruct *filedef)
   memset (tax, 0, sizeof (tax));
 
   fprintf (stdprn, "Comment : %-70s\n%-79s\n%-79s\n\n", quote_buff.comment1,
-	   quote_buff.comment2, quote_buff.comment3);
+           quote_buff.comment2, quote_buff.comment3);
   linecount += 4;
   if (itemize_flag)
     fprintf (stdprn, "%-12s|%-30s|%7s   |%-5s|Tax|%10s\n", "Code",
-	     "Description", "Number", "Units", "Price");
+             "Description", "Number", "Units", "Price");
 
 
-  varl = (struct quote_part_rec *)(quote_file.fileio + (iter = sizeof (quote_buff)));
+  varl =
+    (struct quote_part_rec *) (quote_file.fileio +
+                               (iter = sizeof (quote_buff)));
 
-  for (; iter < quote_buff.reclen; iter += sizeof (struct quote_part_rec), varl++)
+  for (; iter < quote_buff.reclen;
+       iter += sizeof (struct quote_part_rec), varl++)
     {
       if (itemize_flag)
-	{
-	  if (linecount > 33)
-	    {
-	      fputc (EJECT, stdprn);
-	      heading (header);
-	      if (itemize_flag)
-		fprintf (stdprn, "%-12s|%-30s|%7s   |%-5s|Tax|%10s\n", "Code",
-			 "Description", "Number", "Units", "Price");
-	      linecount = 0;
-	    }
-	  if (strcmp (varl->kit_part_code, "SUBTOT") == 0)
-	    {
-	      fprintf (stdprn, "%65s %10.2f\n", "Subtotal :", sub_total);
-	      sub_total = 0.0;
-	    }
-	  else if (varl->kit_part_code[0] == 0)
-	    fprintf (stdprn, "%-12s %-30s %-5s\n", varl->kit_part_code,
-		     varl->description, varl->units);
-	  else
-	    fprintf (stdprn, "%-12s %-30s %7.2f    %-5s  %c   %10.2f\n",
-		     varl->kit_part_code, varl->description, varl->number,
-		     varl->units, varl->tax_code,
-		     (whole_flag) ? varl->wholesale : varl->retail);
-	  linecount++;
-	}
+        {
+          if (linecount > 33)
+            {
+              fputc (EJECT, stdprn);
+              heading (header);
+              if (itemize_flag)
+                fprintf (stdprn, "%-12s|%-30s|%7s   |%-5s|Tax|%10s\n", "Code",
+                         "Description", "Number", "Units", "Price");
+              linecount = 0;
+            }
+          if (strcmp (varl->kit_part_code, "SUBTOT") == 0)
+            {
+              fprintf (stdprn, "%65s %10.2f\n", "Subtotal :", sub_total);
+              sub_total = 0.0;
+            }
+          else if (varl->kit_part_code[0] == 0)
+            fprintf (stdprn, "%-12s %-30s %-5s\n", varl->kit_part_code,
+                     varl->description, varl->units);
+          else
+            fprintf (stdprn, "%-12s %-30s %7.2f    %-5s  %c   %10.2f\n",
+                     varl->kit_part_code, varl->description, varl->number,
+                     varl->units, varl->tax_code,
+                     (whole_flag) ? varl->wholesale : varl->retail);
+          linecount++;
+        }
       total += (whole_flag) ? varl->wholesale : varl->retail;
       sub_total += (whole_flag) ? varl->wholesale : varl->retail;
 
@@ -334,19 +348,19 @@ print_invoice (struct scrllst_msg_rec *msg,struct filestruct *filedef)
 
 #ifdef TAX_OPTION1
       if (varl->tax_code != 'X')
-	tax[varl->tax_code - 'A'] +=
-	  (whole_flag) ? varl->wholesale : varl->retail;
+        tax[varl->tax_code - 'A'] +=
+          (whole_flag) ? varl->wholesale : varl->retail;
 #else
 #ifdef TAX_OPTION2
       if (varl->tax_code != 'X')
-	tax[varl->tax_code - 'A'] += varl->wholesale;
+        tax[varl->tax_code - 'A'] += varl->wholesale;
 #else
 #ifdef TAX_OPTION3
       if (varl->tax_code != 'X')
-	tax[varl->tax_code - 'A'] += varl->retail;
+        tax[varl->tax_code - 'A'] += varl->retail;
 #else
       if (varl->tax_code != 'X')
-	tax[varl->tax_code - 'A'] += varl->cost_price;
+        tax[varl->tax_code - 'A'] += varl->cost_price;
 #endif
 #endif
 #endif
@@ -395,7 +409,7 @@ print_invoice (struct scrllst_msg_rec *msg,struct filestruct *filedef)
 
   heading (ende);
 
-  fclose(stdprn);
+  fclose (stdprn);
 
 
 }
